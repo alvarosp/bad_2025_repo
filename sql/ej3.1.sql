@@ -35,6 +35,12 @@ FROM Empleados
 WHERE Salario = ( SELECT min(Salario)
 FROM Empleados);
 
+-- Con el nombre
+SELECT E2.Nombre
+FROM Empleados AS E1 JOIN Empleados AS E2 ON E1.Jefe = E2.Id
+WHERE E1.Salario = ( SELECT min(Salario)
+FROM Empleados);
+
 -- 2. Indique el id de los diferentes jefes de la empresa.
 SELECT DISTINCT(Jefe)
 FROM Empleados
@@ -53,19 +59,36 @@ WHERE Salario = (SELECT min(Salario)
 FROM Empleados));
 
 -- 5. Elimina todos los empleados que tengan una "a" y una "i" en algún lugar de su nombre y ganen menos que el salario medio.
-
+DELETE FROM Empleados
+WHERE Nombre LIKE '%a%' AND Nombre LIKE '%i%' AND Salario < (
+	SELECT AVG(Salario) FROM Empleados);
 
 -- 6. ¿En cuantos lugares diferentes tenemos departamentos?
-
+SELECT count(DISTINCT Lugar) 'Lugares Únicos'
+FROM Departamentos;
 
 -- 7. ¿Cuánto dinero gasta la empresa en total incluyendo salarios y bonus? Llame a este dato Total.
-
+SELECT SUM(Salario + Bonus) AS 'Total'
+FROM Empleados;
 
 -- 8. Indique el nombre de los trabajadores con un bonus mayor que la media
-
+SELECT Nombre
+FROM Empleados
+WHERE Bonus > (SELECT AVG(Bonus) FROM Empleados);
 
 -- 9. Indique el número de empleados de cada departamento
-
+SELECT DepId, COUNT(DepId) 'Numero Empleados'
+FROM Empleados
+GROUP BY DepId;
 
 -- 10. ¿Cuántos empleados tiene el departamento con más empleados?
+SELECT DepId, MAX(Count) AS 'Max Empleados'
+FROM (SELECT DepId, COUNT(DepId) 'Count'
+FROM Empleados
+GROUP BY DepId);
 
+-- 11. Muestre, para cada jefe, el número de empleados directos que tiene a su cargo. 
+SELECT Jefe, COUNT(*)
+FROM Empleados
+GROUP BY Jefe
+HAVING Jefe IS NOT NULL;
