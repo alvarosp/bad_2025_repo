@@ -92,3 +92,70 @@ SELECT Jefe, COUNT(*)
 FROM Empleados
 GROUP BY Jefe
 HAVING Jefe IS NOT NULL;
+
+-- 12b. Selecciona los empleados que trabajan en el departamento de su jefe
+SELECT *
+FROM Empleados AS E1
+JOIN Empleados AS E2 ON E1.Jefe = E2.Id
+WHERE E1.DepId = E2.DepId;
+
+-- 12. Duplica el bonus de todos los empleados que trabajan en el departamento de su jefe.
+UPDATE Empleados
+SET Bonus = 2*Bonus
+WHERE DepId = (
+SELECT DepId
+FROM Empleados AS E2
+WHERE E2.Id = Empleados.Jefe);
+
+-- 13. Bonus medio en cada lugar.
+SELECT D.Lugar, avg(E.Bonus)
+FROM Empleados AS E
+JOIN Departamentos AS D ON E.DepId = D.Id
+GROUP BY D.Lugar;
+
+-- 14. Salario máximo de todos los jefes que trabajan en el mismo lugar que alguno de sus subordinados.
+SELECT E2.Nombre, MAX(E2.Salario)
+FROM Empleados AS E1
+JOIN Departamentos AS D1 ON E1.DepId = D1.Id
+JOIN Empleados AS E2 ON E2.Id = E1.Jefe
+JOIN Departamentos AS D2 ON D2.Id = E2.DepId
+WHERE D1.Lugar = D2.Lugar;
+
+-- 15. Nombre y nombre del departamento del trabajador que más cobra (incluyendo bonus)
+SELECT E.Nombre, D.Nombre, E.Salario + E.Bonus 'Sueldo Total'
+FROM Empleados AS E
+JOIN Departamentos AS D ON E.DepId = D.Id
+WHERE E.Salario + E.Bonus = (
+SELECT MAX(Salario + Bonus)
+FROM Empleados);
+
+-- 16. Para cada departamento, muestra el nombre y la diferencia entre el trabajador que más cobra y el que menos cobra. 
+SELECT D.Nombre, MAX(E.Salario) - MIN(E.Salario) AS 'Diferencia'
+FROM Empleados AS E
+JOIN Departamentos AS D ON E.DepId = D.Id
+GROUP BY D.Id;
+
+-- 17. Nombres y lugares de los jefes de todos los trabajadores de HR o R&D.
+SELECT DISTINCT E2.Nombre, D2.Lugar
+FROM Empleados AS E1
+JOIN Departamentos AS D1 ON E1.DepId = D1.Id
+JOIN Empleados AS E2 ON E1.Jefe = E2.Id
+JOIN Departamentos AS D2 ON E2.DepId = D2.Id
+WHERE D1.Nombre IN ('HR', 'R&D');
+
+-- 18. Crea una vista que muestre el id y el salario medio de cada departamento.
+CREATE VIEW 'Salario Medio por Departamento' AS
+SELECT D.Id, avg(E.Salario)
+FROM Departamentos AS D LEFT JOIN Empleados AS E ON E.DepId = D.Id
+GROUP BY D.Id;
+
+-- 19. Nombres, lugares y número de empleados de todos los departamentos.
+SELECT D.Nombre, D.Lugar, COUNT(D.Id) 'Numero de Empleados'
+FROM Departamentos AS D JOIN Empleados AS E ON E.DepId = D.Id
+GROUP BY E.DepId;
+
+-- 20. Nombres de todos los departamentos con más de un empleado.
+SELECT D.Nombre, count(d.Id) 'Número de empleados'
+FROM Departamentos AS D JOIN Empleados AS E ON E.DepId = D.Id
+GROUP BY E.DepId
+HAVING count(d.Id) > 1;
