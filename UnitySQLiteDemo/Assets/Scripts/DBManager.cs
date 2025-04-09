@@ -5,10 +5,11 @@ using System.Globalization;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
 using NUnit.Framework;
+using System.IO;
 
 public class DBManager : MonoBehaviour
 {
-    private string dbUri = "URI=file:mydb.sqlite";
+    private string dbBaseUri = "URI=file:";
     private string SQL_CREATE_PRODUCTS = "CREATE TABLE IF NOT EXISTS Productos" +
         "(Id INTEGER UNIQUE NOT NULL PRIMARY KEY" +
         ",Nombre TEXT NOT NULL" +
@@ -26,12 +27,25 @@ public class DBManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        dbConnection = new SqliteConnection(dbUri);
+        string path = dbBaseUri + Path.Combine(Application.persistentDataPath, "mydb.sqlite");
+        Debug.Log("DB en " + path);
+        dbConnection = new SqliteConnection(path);
         dbConnection.Open();
         createTables();
         populateDB();
         searchByPriceMin(4f);
         dbConnection.Close();
+    }
+
+    private string readFromFile(string fileName)
+    {
+        /* https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Application-dataPath.html
+        */
+        string path = Path.Combine(Application.dataPath, fileName);
+        StreamReader sr = new StreamReader(path);
+        string fileContents = sr.ReadToEnd();
+        sr.Close();
+        return fileContents;
     }
 
     private void searchByPriceMin(float price)
@@ -60,6 +74,18 @@ public class DBManager : MonoBehaviour
     }
 
     private void populateDB()
+    {
+        int numeroElementos = getNumberOfElements("Tipos");
+        if (numeroElementos != 0)
+        {
+            return;
+        }
+        IDbCommand dbCommand2 = dbConnection.CreateCommand();
+        dbCommand2.CommandText = readFromFile(Path.Combine("Sql", "dml.sql"));
+        dbCommand2.ExecuteNonQuery();
+    }
+
+    private void populateDB_OLD()
     {
         int numeroElementos = getNumberOfElements("Tipos");
         if (numeroElementos != 0)
@@ -106,7 +132,8 @@ public class DBManager : MonoBehaviour
     private void createTables()
     {
         IDbCommand dbCommand1 = dbConnection.CreateCommand();
-        dbCommand1.CommandText = SQL_CREATE_PRODUCTS + SQL_CREATE_TIPOS;
+        //dbCommand1.CommandText = SQL_CREATE_PRODUCTS + SQL_CREATE_TIPOS;
+        dbCommand1.CommandText = readFromFile(Path.Combine("Sql", "ddl.sql"));
         dbCommand1.ExecuteReader();
     }
 }
