@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Globalization;
+using System.Xml.Serialization;
 
 public class DBManager : MonoBehaviour
 {
@@ -32,6 +33,10 @@ public class DBManager : MonoBehaviour
         pedido1.AddProducto(productos[3], 4);
         InsertPedido(pedido1);
         dbConnection.Close();
+        SaveProductoXMLToFile(productos[1]);
+        SavePedidoXMLToFile(pedido1);
+        SaveProductoJSONToFile(productos[1]);
+        SavePedidoJSONToFile(pedido1);
     }
 
     private void InsertPedido(Pedido pedido)
@@ -109,5 +114,51 @@ public class DBManager : MonoBehaviour
         string fileContents = sr.ReadToEnd();
         sr.Close();
         return fileContents;
+    }
+
+    public static bool WriteToFile(string filename, string data)
+    {
+        string fullPath = Path.Combine(Application.persistentDataPath, filename);
+        try
+        {
+            File.WriteAllText(fullPath, data);
+            Debug.Log("Fichero guardado correctamente en: " + fullPath);
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Error al guardar el fichero en: " + fullPath + " con el error " + e);
+            return false;
+        }
+    }
+
+    private void SaveProductoXMLToFile(Producto producto)
+    {
+        XmlSerializer serializer = new XmlSerializer(typeof(Producto));
+        String path = Path.Combine(Application.persistentDataPath, "producto.xml");
+        using (FileStream stream = new FileStream(path, FileMode.Create))
+        {
+            serializer.Serialize(stream, producto);
+        }
+    }
+
+    private void SavePedidoXMLToFile(Pedido pedido)
+    {
+        XmlSerializer serializer = new XmlSerializer(typeof(Pedido));
+        String path = Path.Combine(Application.persistentDataPath, "pedido.xml");
+        using (FileStream stream = new FileStream(path, FileMode.Create))
+        {
+            serializer.Serialize(stream, pedido);
+        }
+    }
+
+    private void SaveProductoJSONToFile(Producto producto)
+    {
+        WriteToFile("producto.json", JsonUtility.ToJson(producto));
+    }
+
+    private void SavePedidoJSONToFile(Pedido pedido)
+    {
+        WriteToFile("pedido.json", JsonUtility.ToJson(pedido));
     }
 }

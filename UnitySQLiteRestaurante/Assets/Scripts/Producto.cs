@@ -1,10 +1,12 @@
+using System;
 using UnityEngine;
 
+[Serializable]
 public class Producto
 {
-    public int Id { get; private set; }
-    public string Nombre { get; private set; }
-    public float Precio { get; private set; }
+    public int Id;
+    public string Nombre;
+    public float Precio;
 
     public Producto(int id, string nombre, float precio)
     {
@@ -12,6 +14,8 @@ public class Producto
         this.Nombre = nombre;
         this.Precio = precio;
     }
+
+    public Producto() { }
 
     public override string ToString()
     {

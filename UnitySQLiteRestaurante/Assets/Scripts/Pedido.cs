@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 
+[Serializable]
 public class Pedido
 {
-    public int Id { get; private set; }
+    public int Id;
 
-    public int Mesa {  get; private set; }
-    public DateTime Fecha { get; private set; }
-    private List<ProductoCantidad> productos;
+    public int Mesa;
+    public DateTime Fecha;
+    public List<ProductoCantidad> productos;
 
     public Pedido(int id, int mesa, DateTime fecha)
     {
@@ -16,6 +17,8 @@ public class Pedido
         Fecha = fecha;
         productos = new List<ProductoCantidad>();
     }
+
+    public Pedido() { }
 
     public void AddProducto(Producto producto, int cantidad)
     {
