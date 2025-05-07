@@ -1,0 +1,10 @@
+{
+	"name": "Café de medianoche",
+	"artist": "Van Gogh",
+	"dimension": {
+		"width": 100,
+		"height": 120
+	},
+	"description": "",
+	"tags": ["oil", "famous"]
+}
